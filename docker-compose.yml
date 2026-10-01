@@ -1,0 +1,57 @@
+services:
+
+  mongo:
+    image: mongo:8
+    container_name: trustdesk-mongo
+
+    restart: unless-stopped
+
+    ports:
+      - "27017:27017"
+
+    volumes:
+      - trustdesk_mongo_data:/data/db
+
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mongosh",
+          "--quiet",
+          "--eval",
+          "db.adminCommand('ping').ok"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    container_name: trustdesk-server
+
+    restart: unless-stopped
+
+    ports:
+      - "5000:5000"
+
+    environment:
+      PORT: 5000
+      MONGODB_URI: mongodb://mongo:27017/trustdesk
+      CLIENT_URL: http://localhost:5173
+      DEMO_TOKEN: ${DEMO_TOKEN:-trustdesk-demo-token}
+      AI_PROVIDER: ${AI_PROVIDER:-mock}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-2.5-flash}
+
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+
+volumes:
+  trustdesk_mongo_data:

@@ -368,7 +368,7 @@ It intentionally does not use:
 ticket.expected_actions
 ```
 
-because those fields belong to the evaluation dataset rather than runtime decision-making.
+Because those fields belong to the evaluation dataset rather than runtime decision-making.
 
 ## Canonical Tool Catalog
 
